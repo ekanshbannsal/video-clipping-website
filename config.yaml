@@ -1,0 +1,45 @@
+# ====== SHORTS BOT SETTINGS ======
+
+# --- AI (clips chunne ke liye) ---
+gemini_model: gemini-3.5-flash-lite      # updated from discontinued 2.5-flash
+# API key config mein mat likho; terminal mein: export GEMINI_API_KEY="..."
+
+# --- Transcription ---
+whisper_model: small                # tiny/base/small/medium (bada = better Hindi, slow)
+language: auto                      # "hi" Hindi, "en" English, ya "auto"
+
+# --- Clips ---
+clips_per_video: 5
+clip_min_sec: 20
+clip_max_sec: 58                    # Shorts ke liye 60 se kam rakho
+
+# --- Captions / edit ---
+captions:
+  enabled: true
+  font: Arial                       # Hindi ke liye Mac pe: "Kohinoor Devanagari"
+  font_size: 80
+  hook_font_size: 66
+  words_per_line: 3
+  uppercase: true                   # sirf English ke liye achha; Hindi ke liye false karo
+  highlight_color: "&H0000FFFF"     # yellow (BGR format)
+hook_text: true                     # top pe AI hook title (pehle 3 sec)
+face_tracking: true                 # face ke hisaab se crop (OpenCV)
+video_preset: veryfast              # ffmpeg speed: ultrafast ... slow
+
+# --- Upload schedule ---
+schedule:
+  timezone: Asia/Kolkata
+  slots: ["09:00", "13:00", "19:00"]   # roz in times pe publish hoga
+  max_per_day: 3                        # YouTube free quota ~6 uploads/din hai
+
+upload:
+  category_id: "22"                 # 22 = People & Blogs, 27 = Education, 24 = Entertainment
+  made_for_kids: false
+  default_tags: ["shorts"]
+
+# --- Auto mode (watch) ---
+watch:
+  channel_id: ""                    # aapke channel ka ID (UC...) -- naya video aate hi auto process
+  poll_minutes: 30
+  process_existing: false           # false = purane videos skip, sirf naye
+  min_source_minutes: 3             # isse chhote videos (Shorts) skip

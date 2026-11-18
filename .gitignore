@@ -1,0 +1,26 @@
+# Secrets & Tokens (NEVER COMMIT)
+.env
+client_secret.json
+token.json
+
+# Python & Environment
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Media & Storage
+downloads/
+output/
+data/work/
+data/state.json
+data/*.tmp
+inbox/
+links.txt
+
+# OS & IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp

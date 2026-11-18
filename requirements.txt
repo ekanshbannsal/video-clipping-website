@@ -1,0 +1,8 @@
+faster-whisper>=1.0.0
+yt-dlp
+requests
+PyYAML
+google-api-python-client
+google-auth-oauthlib
+google-auth-httplib2
+opencv-python-headless<5
