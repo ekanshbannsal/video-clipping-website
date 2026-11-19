@@ -3,8 +3,15 @@ import json, os, re, statistics, subprocess, sys, time
 from pathlib import Path
 import requests
 
-# Ensure ffmpeg-full is preferred if installed
-for _p in ("/opt/homebrew/opt/ffmpeg-full/bin", "/usr/local/opt/ffmpeg-full/bin"):
+# Ensure venv bin and ffmpeg-full are preferred if installed
+for _p in (
+    str(Path(sys.prefix) / "bin"),
+    str(Path(__file__).parent / "venv" / "bin"),
+    "/opt/homebrew/opt/ffmpeg-full/bin",
+    "/usr/local/opt/ffmpeg-full/bin",
+    "/opt/homebrew/bin",
+    "/usr/local/bin"
+):
     if os.path.isdir(_p) and _p not in os.environ.get("PATH", ""):
         os.environ["PATH"] = f"{_p}:{os.environ.get('PATH', '')}"
 
@@ -18,6 +25,13 @@ def _notify(msg):
             _log_cb(msg)
         except Exception:
             pass
+
+
+def _safe_print(*a, **kw):
+    try:
+        print(*a, **kw)
+    except Exception:
+        pass
 
 
 def has_ass_filter():
@@ -85,8 +99,8 @@ def transcribe(path, cfg, cache):
         words = [{"w": w.word.strip(), "start": w.start, "end": w.end}
                  for w in (s.words or []) if w.word.strip()]
         out.append({"start": s.start, "end": s.end, "text": s.text.strip(), "words": words})
-        print(f"   transcribing... {s.end/60:.1f} min", end="\r")
-    print()
+        _safe_print(f"   transcribing... {s.end/60:.1f} min", end="\r")
+    _safe_print()
     cache.parent.mkdir(parents=True, exist_ok=True)
     cache.write_text(json.dumps({"segments": out, "language": info.language}, ensure_ascii=False))
     return out, info.language
@@ -118,8 +132,9 @@ TRANSCRIPT:
 def gemini(prompt, cfg):
     env_f = Path(__file__).parent / ".env"
     key = os.environ.get("GEMINI_API_KEY") or (dict(l.strip().split("=", 1) for l in env_f.read_text().splitlines() if "=" in l).get("GEMINI_API_KEY") if env_f.exists() else None)
-    if not key:
-        raise RuntimeError("GEMINI_API_KEY set nahi hai (export GEMINI_API_KEY=...)")
+    if not key or key.strip(' "\'') in ("", "your_gemini_api_key_here", "your_actual_api_key_here"):
+        raise RuntimeError("GEMINI_API_KEY set nahi hai. Kripya .env file mein apni Gemini API key set karein: https://aistudio.google.com/apikey")
+    key = key.strip(' "\'')
     url = (f"https://generativelanguage.googleapis.com/v1beta/models/"
            f"{cfg['gemini_model']}:generateContent")
     body = {"contents": [{"parts": [{"text": prompt}]}],
@@ -128,7 +143,7 @@ def gemini(prompt, cfg):
         r = requests.post(url, params={"key": key}, json=body, timeout=300)
         if r.status_code == 429 or r.status_code >= 500:
             wait = 20 * (attempt + 1)
-            print(f"   Gemini busy ({r.status_code}), {wait}s wait...")
+            _safe_print(f"   Gemini busy ({r.status_code}), {wait}s wait...")
             time.sleep(wait)
             continue
         r.raise_for_status()
@@ -255,7 +270,7 @@ def face_center(src, start, end):
         cap.release()
         return statistics.median(xs) if xs else None
     except Exception as e:  # face tracking optional hai; fail ho toh center crop
-        print(f"   (face tracking skip: {type(e).__name__})")
+        _safe_print(f"   (face tracking skip: {type(e).__name__})")
         return None
 
 

@@ -69,8 +69,13 @@ def run_pipeline_job(cfg_base, store, target, clips_count, auto_upload):
             job_state["last_run"] = datetime.now().strftime("%H:%M:%S")
 
     except Exception as e:
-        err = str(e)
+        import traceback
+        err = str(e) or type(e).__name__
         add_log(f"ERROR: {err}")
+        try:
+            traceback.print_exc()
+        except Exception:
+            pass
         with job_lock:
             job_state["status"] = "error"
             job_state["step"] = "Failed"

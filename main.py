@@ -27,7 +27,10 @@ _web_logger = None
 
 def log(*a):
     msg = " ".join(str(x) for x in a)
-    print(datetime.now().strftime("[%H:%M:%S]"), msg, flush=True)
+    try:
+        print(datetime.now().strftime("[%H:%M:%S]"), msg, flush=True)
+    except Exception:
+        pass
     if _web_logger:
         try:
             _web_logger(msg)
@@ -42,7 +45,7 @@ def load_cfg():
 def check_tools():
     for t in ("ffmpeg", "ffprobe"):
         if not shutil.which(t):
-            sys.exit(f"{t} install nahi hai. Mac: brew install ffmpeg")
+            raise RuntimeError(f"{t} install nahi hai. Mac: brew install ffmpeg")
 
 
 # ---------------------------------------------------------------- core steps
